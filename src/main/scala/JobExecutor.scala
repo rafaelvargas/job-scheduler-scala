@@ -19,7 +19,7 @@ class JobExecutor private (
   private def updateStatus(jobId: String, status: JobStatus): IO[Unit] =
     jobStatuses.update(_ + (jobId -> status))
 
-  def submitJob(job: Job): IO[Unit] = {
+  def submitJob(job: Job): IO[IO[JobStatus]] = {
     val jobExecution =
       updateStatus(job.id, JobStatus.Pending) *>
         Console[IO].println(s"Job ${job.id} queued") *>
@@ -36,7 +36,9 @@ class JobExecutor private (
           }
           .guarantee(jobFibers.update(_ - job.id))
 
-    jobExecution.start.flatMap(fiber => jobFibers.update(_ + (job.id -> fiber)))
+    jobExecution.start.flatMap(fiber => 
+      jobFibers.update(_ + (job.id -> fiber)).as(awaitJob(job.id))
+    )
   }
 
   def cancelJob(jobId: String): IO[Unit] =
@@ -59,7 +61,7 @@ class JobExecutor private (
   def checkJobStatus(jobId: String): IO[Option[JobStatus]] =
     jobStatuses.get.map(_.get(jobId))
 
-  def awaitJob(jobId: String): IO[JobStatus] =
+  private def awaitJob(jobId: String): IO[JobStatus] =
     checkJobStatus(jobId).flatMap {
       case Some(
             status @ (JobStatus.Succeeded | JobStatus.Failed |
