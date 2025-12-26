@@ -19,18 +19,17 @@ sbt run
 
 - **Semaphore usage for concurrency control**: Using `Semaphore[IO]` provides a clean, functional way to limit concurrent jobs without manual locking or complex coordination logic.
 
-- **Polling to obtain final job results**: The `awaitJob` method polls job status every 100ms. While simple, this approach avoids complex callback mechanisms and works well for moderate workloads.
+- **Failure Simulation**: Jobs have a 20% probability of failing midway through execution to simulate real-world failure scenarios.
 
-- **Result Handle Pattern**: `submitJob` returns `IO[IO[JobStatus]]` - an immediate handle that can be awaited later. This allows callers to:
-   - Submit jobs without blocking
-   - Await results when needed
+- **Polling to obtain final job results**: The `awaitJob` method polls job status every 100ms to avoid complex callback mechanisms.
 
+- **Async Result Handle**: `submitJob` returns `IO[IO[JobStatus]]` - an immediate handle that can be awaited later, allowing non-blocking job submission.
 
 ## What could be improved?
 
 - **Event-Driven Completion**: Instead of polling to check job status, use a different approach to signal job completion immediately.
 
-- **Persistence Logic**: Add job state persistence (e.g., database) to 
+- **Persistence Logic**: Add job state persistence (e.g., database) to make the scheduler resilient to restarts.
 
 - **Job Priority & Queuing**: Implement priority queues so high-priority jobs can jump ahead of pending jobs.
 
