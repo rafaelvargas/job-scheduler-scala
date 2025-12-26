@@ -21,9 +21,11 @@ sbt run
 
 - **Failure Simulation**: Jobs have a 20% probability of failing midway through execution to simulate real-world failure scenarios.
 
-- **Polling to obtain final job results**: The `awaitJob` method polls job status every 100ms to avoid complex callback mechanisms.
+- **Cancellation Logic**: Jobs can be cancelled either before they start (pending status) or during execution (running status).
 
 - **Async Result Handle**: `submitJob` returns `IO[IO[JobStatus]]` - an immediate handle that can be awaited later, allowing non-blocking job submission.
+
+- **Polling to obtain final job results**: The `awaitJob` method polls job status every 100ms to avoid complex callback mechanisms.
 
 ## What could be improved?
 
