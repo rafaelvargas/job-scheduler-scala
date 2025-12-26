@@ -36,7 +36,7 @@ class JobExecutor private (
           }
           .guarantee(jobFibers.update(_ - job.id))
 
-    jobExecution.start.flatMap(fiber => 
+    jobExecution.start.flatMap(fiber =>
       jobFibers.update(_ + (job.id -> fiber)).as(awaitJob(job.id))
     )
   }
